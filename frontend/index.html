@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SignalCharts – Trading Intelligence & AI Chart Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="window.initGoogleAuth && window.initGoogleAuth()"></script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="11" width="4" height="10" rx="1.5" fill="#06b6d4" />
+                        <rect x="10" y="4" width="4" height="17" rx="1.5" fill="#3b82f6" />
+                        <rect x="17" y="8" width="4" height="13" rx="1.5" fill="#10b981" />
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">SignalCharts</span>
+                    <span class="brand-sub">TRADING INTELLIGENCE</span>
+                </div>
+            </div>
+
+            <div class="nav-container">
+                <div class="nav-section-title">PLATFORM</div>
+                <nav class="nav-menu">
+                    <button class="nav-link" data-tab="today">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span>Today</span>
+                    </button>
+                    <button class="nav-link" data-tab="markets">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <span>Markets</span>
+                    </button>
+                    <button class="nav-link on" data-tab="analyze">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+                        <span>Analyze</span>
+                    </button>
+                    <button class="nav-link" data-tab="watchlist">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        <span>Watchlist</span>
+                    </button>
+                    <button class="nav-link" data-tab="news">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+                        <span>News</span>
+                    </button>
+                </nav>
+
+                <div class="nav-section-title">ACCOUNT</div>
+                <nav class="nav-menu">
+                    <button class="nav-link" data-tab="settings">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span>Settings</span>
+                    </button>
+                    <button class="nav-link" data-tab="alerts">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3L2 6"/><path d="M22 6l-3-3"/></svg>
+                        <span>Alerts</span>
+                    </button>
+                    <button class="nav-link" data-tab="notifications">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span>Notifications</span>
+                    </button>
+                    <button class="nav-link" data-tab="history">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg>
+                        <span>History</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="collapse-btn" id="collapse-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+                    <span>Collapse</span>
+                </button>
+                <div class="user-profile-card">
+                    <div class="avatar-badge" id="user-avatar">GT</div>
+                    <div class="user-meta">
+                        <div class="user-name" id="user-display-name">Guest Trader</div>
+                        <div class="user-email" id="user-display-email">Free Plan (100 / day)</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTAINER -->
+        <div class="main-wrapper">
+            <!-- TOP BAR -->
+            <header class="topbar">
+                <div class="breadcrumbs">
+                    <span class="bc-root">SignalCharts</span>
+                    <span class="bc-sep">&rsaquo;</span>
+                    <span class="bc-active" id="breadcrumb-current">Analyze</span>
+                </div>
+                <div class="topbar-actions">
+                    <button class="icon-action-btn" title="Notifications">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span class="notif-dot"></span>
+                    </button>
+                    <div class="lang-selector-pill">
+                        <span class="flag-icon">🇺🇸</span>
+                        <select id="lang" class="lang-dropdown">
+                            <option value="en">EN</option>
+                            <option value="hi">HI</option>
+                            <option value="te">TE</option>
+                            <option value="es">ES</option>
+                            <option value="ar">AR</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- AUTH / LOGIN MODAL / PANEL -->
+            <div id="login" class="login-overlay center">
+                <div class="login-card">
+                    <div class="brand-logo center-logo">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="11" width="4" height="10" rx="1.5" fill="#06b6d4" />
+                            <rect x="10" y="4" width="4" height="17" rx="1.5" fill="#3b82f6" />
+                            <rect x="17" y="8" width="4" height="13" rx="1.5" fill="#10b981" />
+                        </svg>
+                    </div>
+                    <h2>Welcome to SignalCharts</h2>
+                    <p class="login-sub">Sign in with Google to unlock 100 AI chart analyses per day & live market intelligence.</p>
+
+                    <!-- GOOGLE SIGN-IN CONTAINER -->
+                    <div id="gbtn" class="gbtn-wrap"></div>
+                    
+                    <!-- CUSTOM GOOGLE SIGN-IN BUTTON -->
+                    <button id="custom-google-btn" class="btn-google">
+                        <svg width="18" height="18" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Sign in with Google</span>
+                    </button>
+
+                    <div class="login-divider">
+                        <span>or</span>
+                    </div>
+
+                    <button id="guest" class="btn-guest">Continue as Guest</button>
+                </div>
+            </div>
+
+            <!-- APP MAIN CONTENT -->
+            <main id="app" class="content-area" hidden>
+                <!-- TAB 1: ANALYZE (AI CHART ANALYSIS) -->
+                <section id="analyze" class="tab-pane on">
+                    <div class="page-header">
+                        <h1 class="page-title">AI Chart Analysis</h1>
+                        <p class="page-subtitle">Upload a chart image and get instant technical analysis powered by AI</p>
+                    </div>
+
+                    <div class="analyze-grid">
+                        <!-- LEFT CARD: UPLOAD CHART -->
+                        <div class="chartick-card upload-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Upload Chart</h3>
+                                <span class="badge-usage" id="usage-badge">0 of 100 used</span>
+                            </div>
+
+                            <label class="drop-zone" id="drop">
+                                <input type="file" id="file" accept=".png,.jpg,.jpeg,.webp,.heic,.heif,image/png,image/jpeg,image/webp,image/heic,image/heif" hidden>
+                                <div class="upload-icon-circle">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                </div>
+                                <div class="drop-text-primary">Drag and drop your chart image here, or click to browse</div>
+                                <div class="drop-text-secondary">Supports PNG, JPG, WEBP, HEIC (max 10MB)</div>
+                                <img id="preview" alt="Chart Preview" class="chart-preview-img">
+                            </label>
+
+                            <button id="go" class="primary-btn-action">
+                                <span>Analyze chart</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+
+                            <div class="card-footer-link">
+                                <a href="javascript:void(0)" class="info-link">Questions about uploads, formats or limits?</a>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT CARD: TECHNICAL ANALYSIS OUTPUT -->
+                        <div class="chartick-card analysis-card">
+                            <div id="out">
+                                <!-- EMPTY PLACEHOLDER STATE -->
+                                <div class="empty-state">
+                                    <div class="empty-icon-circle">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="22" y1="12" x2="18" y2="12"/>
+                                            <line x1="6" y1="12" x2="2" y2="12"/>
+                                            <line x1="12" y1="6" x2="12" y2="2"/>
+                                            <line x1="12" y1="22" x2="12" y2="18"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="empty-title">AI-powered technical analysis</h3>
+                                    <p class="empty-sub">&larr; Upload Chart</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: MARKETS (LIST & DETAIL VIEWS) -->
+                <section id="markets" class="tab-pane">
+                    <!-- VIEW 1: ALL FOREX & GLOBAL MARKETS LIST -->
+                    <div id="markets-list-view">
+                        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;">
+                            <div>
+                                <h1 class="page-title">Forex & Global Markets</h1>
+                                <p class="page-subtitle">Real-time institutional bid/ask rates, 24h spreads & candlestick technical analysis across all pairs</p>
+                            </div>
+                            <div class="markets-search-wrap">
+                                <div class="search-input-pill">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                                    <input type="text" id="market-search-input" placeholder="Search pairs (e.g. GBP, JPY, Gold, INR...)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CATEGORY FILTER PILLS -->
+                        <div class="market-cat-bar" id="market-cat-filters">
+                            <button type="button" class="mkt-cat-pill on" data-cat="all">All Markets (26)</button>
+                            <button type="button" class="mkt-cat-pill" data-cat="majors">Majors (7)</button>
+                            <button type="button" class="mkt-cat-pill" data-cat="crosses">Crosses (9)</button>
+                            <button type="button" class="mkt-cat-pill" data-cat="exotics">Exotics (4)</button>
+                            <button type="button" class="mkt-cat-pill" data-cat="indices">Commodities & Indices (6)</button>
+                        </div>
+
+                        <!-- GRID OF ALL FOREX PAIRS -->
+                        <div class="all-markets-grid" id="all-markets-cards"></div>
+                    </div>
+
+                    <!-- VIEW 2: ASSET DETAIL VIEW (MATCHING REFERENCE IMAGE 3) -->
+                    <div id="markets-detail-view" style="display:none;">
+                        <!-- TOP ASSET HEADER -->
+                        <div class="market-view-header">
+                            <div class="back-link" id="market-back-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                                <span>Back to Markets</span>
+                            </div>
+
+                            <div class="asset-identity-row">
+                                <div class="asset-flag-box" id="market-flag-circle">
+                                    <span class="flag-symbol">🇪🇺</span>
+                                </div>
+                                <div class="asset-meta-main">
+                                    <div class="asset-title-row">
+                                        <h2 class="asset-full-title" id="market-full-title">Euro / US Dollar (EUR/USD)</h2>
+                                        <span class="asset-category-badge" id="market-category-badge">Currencies</span>
+                                        <button class="bookmark-icon-btn" title="Add to Watchlist" id="market-bookmark-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                        </button>
+                                    </div>
+                                    <div class="asset-ticker-sub" id="market-sub-ticker">EUR/USD</div>
+                                    <div class="asset-price-row">
+                                        <span class="asset-big-price" id="market-big-price">$1.0968</span>
+                                        <span class="asset-price-delta down" id="market-price-delta">$-0.0000 (-0.00%)</span>
+                                        <span class="market-status-dot-text" id="market-status-badge">
+                                            <span class="status-dot"></span> Market closed
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2-COLUMN DETAIL LAYOUT -->
+                        <div class="market-detail-layout">
+                            <!-- LEFT MAIN: CHART & INDICATOR BAR -->
+                            <div class="market-chart-column">
+                                <div class="chart-container-card">
+                                    <div class="chart-top-bar">
+                                        <div class="chart-close-meta" id="chart-close-meta">1D close 1.0968 -0.00%</div>
+                                        <div class="chart-tf-group" id="market-timeframes">
+                                            <button type="button" class="tf-btn" data-tf="5m" data-interval="5">5m</button>
+                                            <button type="button" class="tf-btn" data-tf="15m" data-interval="15">15m</button>
+                                            <button type="button" class="tf-btn" data-tf="1H" data-interval="60">1H</button>
+                                            <button type="button" class="tf-btn" data-tf="4H" data-interval="240">4H</button>
+                                            <button type="button" class="tf-btn on" data-tf="1D" data-interval="D">1D</button>
+                                            <button type="button" class="tf-btn" data-tf="1W" data-interval="W">1W</button>
+                                            <button type="button" class="tf-expand-btn" title="Maximize Chart">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="market-open-notice" id="market-reopen-notice">
+                                        <span class="dot-warn">●</span> Market closed · reopens Mon 3:30 AM
+                                    </div>
+
+                                    <div id="tv" class="tradingview-frame-box"></div>
+                                </div>
+
+                                <!-- BOTTOM INDICATORS ROW (AVG. VOLUME, 50D MA, 200D MA, RSI) -->
+                                <div class="market-indicators-grid">
+                                    <div class="ind-card">
+                                        <span class="ind-label">AVG. VOLUME</span>
+                                        <span class="ind-value" id="ind-avg-vol">0</span>
+                                    </div>
+                                    <div class="ind-card">
+                                        <span class="ind-label">50D MA</span>
+                                        <span class="ind-value" id="ind-50-ma">1.12</span>
+                                    </div>
+                                    <div class="ind-card">
+                                        <span class="ind-label">200D MA</span>
+                                        <span class="ind-value" id="ind-200-ma">1.08</span>
+                                    </div>
+                                    <div class="ind-card">
+                                        <span class="ind-label">RSI</span>
+                                        <div class="ind-val-badge">
+                                            <span class="ind-value" id="ind-rsi-val">29</span>
+                                            <span class="rsi-badge oversold" id="ind-rsi-badge">Oversold</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- RIGHT ACTION PANEL -->
+                            <div class="market-actions-column">
+                                <button id="btn-generate-analysis" class="btn-action-green">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+                                    <span>Generate Analysis (<span id="gen-tf-label">1D</span>)</span>
+                                </button>
+
+                                <button id="btn-deep-dive" class="btn-action-blue">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m10 10-6.157 6.162a2 2 0 0 0 0 2.828l.167.168a2 2 0 0 0 2.828 0L13 13"/><circle cx="16.5" cy="7.5" r="4.5"/></svg>
+                                    <span>Deep Dive Analysis</span>
+                                </button>
+
+                                <button id="btn-create-alert" class="btn-action-dark">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3L2 6"/><path d="M22 6l-3-3"/></svg>
+                                    <span>Create smart alert</span>
+                                </button>
+
+                                <!-- AI INTELLIGENCE OUTPUT BOX -->
+                                <div class="intelligence-card" id="market-intelligence-box">
+                                    <div class="intelligence-empty-state">
+                                        <div class="sparkle-circle-icon">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+                                        </div>
+                                        <h4 class="empty-sub-heading">Click the button above to generate a data driven analysis using live market indicators.</h4>
+                                        <p class="empty-fine-print">Analysis is based on live indicator data (RSI, MACD, EMA, ATR) and calculated support/resistance levels.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: TODAY (POPULAR MARKETS TABLE & REALTIME ACTIVITY) -->
+                <section id="today" class="tab-pane">
+                    <p class="disclaimer-header-note">Educational analysis of past price behavior — not investment advice.</p>
+
+                    <div class="section-badge-header">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        <span>POPULAR MARKETS — Add your own to personalize</span>
+                    </div>
+
+                    <!-- POPULAR MARKETS LIST -->
+                    <div class="popular-markets-container" id="popular-markets-list">
+                        <!-- Populated dynamically and styled matching screenshot -->
+                    </div>
+
+                    <!-- BOTTOM SECTION: NEWS LINK -->
+                    <div class="today-news-footer-bar">
+                        <div class="tn-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+                            <span>NEWS</span>
+                        </div>
+                        <button class="link-all-news" id="btn-all-news">All news &rarr;</button>
+                    </div>
+
+                    <div class="today-news-preview-grid" id="today-news-preview"></div>
+                </section>
+
+                <!-- TAB 4: NEWS & INSIGHTS (MATCHING REFERENCE SCREENSHOT) -->
+                <section id="news" class="tab-pane">
+                    <div class="page-header">
+                        <h1 class="page-title">News & Insights</h1>
+                        <p class="page-subtitle">Market sentiment and financial news</p>
+                    </div>
+
+                    <!-- CATEGORY FILTER PILLS -->
+                    <div class="news-category-bar" id="news-categories">
+                        <button type="button" class="news-cat-pill on" data-cat="General">General</button>
+                        <button type="button" class="news-cat-pill" data-cat="Crypto">Crypto</button>
+                        <button type="button" class="news-cat-pill" data-cat="Currencies">Currencies</button>
+                        <button type="button" class="news-cat-pill" data-cat="Tadawul">Tadawul</button>
+                        <button type="button" class="news-cat-pill" data-cat="MENA">MENA</button>
+                    </div>
+
+                    <!-- 2-COLUMN NEWS & TRENDING LAYOUT -->
+                    <div class="news-insights-layout">
+                        <!-- LEFT COLUMN: NEWS FEED -->
+                        <div class="news-feed-column" id="news-feed-list">
+                            <!-- Populated with rich styled cards -->
+                        </div>
+
+                        <!-- RIGHT COLUMN: TRENDING WIDGET -->
+                        <div class="trending-widget-card">
+                            <div class="widget-header">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                                <span>Trending on SignalCharts</span>
+                            </div>
+
+                            <div class="trending-empty-state">
+                                <div class="trend-icon-circle">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 7 7 17"/><polyline points="7 7 17 7 17 17"/></svg>
+                                </div>
+                                <span class="trend-empty-text">No trending data yet.</span>
+                                <div class="trend-skeleton-lines">
+                                    <div class="sk-line w-80"></div>
+                                    <div class="sk-line w-60"></div>
+                                    <div class="sk-line w-70"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 5: WATCHLIST -->
+                <section id="watchlist" class="tab-pane">
+                    <div class="page-header">
+                        <h1 class="page-title">Currency Watchlist</h1>
+                        <p class="page-subtitle">Your favorite pairs with real-time price monitoring and alerts</p>
+                    </div>
+                    <div class="watchlist-grid" id="watchlist-cards"></div>
+                </section>
+
+                <!-- TAB 6: ALERTS -->
+                <section id="alerts" class="tab-pane">
+                    <div class="page-header">
+                        <h1 class="page-title">Smart Price Alerts</h1>
+                        <p class="page-subtitle">Receive browser notifications when pairs cross your target breakout levels</p>
+                    </div>
+                    <div class="chartick-card">
+                        <div class="alert-input-row">
+                            <select id="apair" class="custom-select"></select>
+                            <select id="adir" class="custom-select">
+                                <option value="above">Goes above</option>
+                                <option value="below">Goes below</option>
+                            </select>
+                            <input id="alevel" type="number" step="any" placeholder="Trigger Price" class="custom-input">
+                            <button id="aadd" class="primary-btn-action" style="margin:0;width:auto;padding:10px 20px;">Add Alert</button>
+                        </div>
+                        <ul id="alist" class="alerts-styled-list"></ul>
+                    </div>
+                </section>
+
+                <!-- TAB 7: SETTINGS -->
+                <section id="settings" class="tab-pane">
+                    <div class="page-header">
+                        <h1 class="page-title">Platform Settings</h1>
+                        <p class="page-subtitle">Customize language, push notifications, and session preferences</p>
+                    </div>
+                    <div class="chartick-card settings-card">
+                        <div class="settings-row">
+                            <div>
+                                <h4 style="margin:0 0 4px 0;">Browser Push Notifications</h4>
+                                <p style="margin:0;color:var(--text-muted);font-size:13px;">Get instant sound and desktop alerts when price hits your levels</p>
+                            </div>
+                            <button id="notif" class="secondary-btn">Enable Notifications</button>
+                        </div>
+                        <div class="settings-divider"></div>
+                        <div class="settings-row">
+                            <div>
+                                <h4 style="margin:0 0 4px 0;">Account Session</h4>
+                                <p style="margin:0;color:var(--text-muted);font-size:13px;">Sign out of current trading intelligence session</p>
+                            </div>
+                            <button id="logout" class="danger-btn">Sign Out</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 8: NOTIFICATIONS -->
+                <section id="notifications" class="tab-pane">
+                    <div class="page-header">
+                        <h1 class="page-title">Notification Center</h1>
+                        <p class="page-subtitle">Recent signal alerts and system notifications</p>
+                    </div>
+                    <div class="chartick-card">
+                        <div class="notif-item">
+                            <div class="notif-badge">INFO</div>
+                            <div>
+                                <b>Welcome to SignalCharts 2.0</b>
+                                <p style="margin:2px 0 0 0;font-size:13px;color:var(--text-muted);">New aesthetic trading intelligence dashboard is now live with enhanced AI vision models.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 9: HISTORY -->
+                <section id="history" class="tab-pane">
+                    <div class="page-header">
+                        <h1 class="page-title">Analysis History</h1>
+                        <p class="page-subtitle">Review previous chart uploads and technical predictions</p>
+                    </div>
+                    <div id="history-list" class="chartick-card">
+                        <p style="color:var(--text-muted);text-align:center;padding:24px 0;">Your recent chart analyses will appear here.</p>
+                    </div>
+                </section>
+            </main>
+
+            <!-- FOOTER LEGAL -->
+            <footer class="app-footer">
+                <p>Educational use only. Not financial advice. Trading carries a high risk of loss, and no tool can guarantee accuracy.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- FLOATING SUPPORT BUTTON -->
+    <a href="https://wa.me/" target="_blank" class="floating-support-btn" title="Contact Support">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+        <span>Support</span>
+    </a>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
