@@ -142,86 +142,39 @@ app.get('/api/rates', async (req, res) => {
 });
 
 // ---- AI chart analysis (Gemini vision, free tier)
-const PROMPT = lang => `You are an expert forex and binary options technical analyst specializing in Quotex, PocketOption, and Metatrader candlestick analysis. Analyze the attached trading chart screenshot.
+const PROMPT = lang => `You are an expert forex and binary options technical analyst. Analyze the attached trading chart screenshot.
 CRITICAL TIMEFRAME & TIME DETECTION:
 1. Examine the image carefully to extract the EXACT TIMEFRAME / CANDLE INTERVAL shown on the chart (for example: 5s, 15s, 30s, 1m, 2m, 5m, 10m, 15m, 30m, 1h, 4h, 1D). Check the chart tools, interval buttons, candle icons, or time axis.
-2. If there is a visible clock, trade expiration timer, or countdown (e.g., 00:00:05, 16:25:39 UTC, Quotex countdown, etc.), extract it accurately.
-3. PROVIDE PRECISE "WHERE TO BUY" AND "WHERE TO SELL" LEVELS WITH NEXT CANDLE PREDICTION:
-   - Identify the exact price level / zone to BUY (CALL / UP).
-   - Identify the exact price level / zone to SELL (PUT / DOWN).
-   - Specify the exact Quotex / broker button to click (GREEN UP or RED DOWN).
-   - Specify the recommended expiration time (e.g. 1 Minute, 2 Minutes, 5 Minutes).
+2. If there is a visible clock, trade expiration timer, or countdown (e.g., 00:00:05, 16:25:39 UTC, etc.), extract it accurately.
+3. BASE YOUR FUTURE PRICE ACTION PREDICTION DIRECTLY ON THE DETECTED CHART TIMEFRAME:
+   - If the chart is 1-minute (1m), forecast the next 1-3 candles (1 to 3 minutes).
+   - If the chart is 5-minute (5m), forecast the next 1-3 candles (5 to 15 minutes).
+   - If the chart is 1-hour (1h), forecast the next 1-4 hours.
+   - Align target price, entry, and stop loss precisely to this detected timeframe.
 
 Reply ONLY with JSON:
 {
-  "pair": "Currency pair identified (e.g. CAD/CHF, EUR/USD, EUR/JPY, etc.)",
+  "pair": "Currency pair identified (e.g. GBP/USD, EUR/JPY, etc.)",
   "timeframe": "Detected timeframe directly from chart (e.g. 1m, 5m, 15m, 1h)",
-  "detectedTime": "Visible chart clock / timer if readable (e.g. 00:00:05 timer or 16:25 UTC)",
+  "detectedTime": "Visible chart clock / timer if readable (e.g. 16:25 UTC or 00:00:05 timer)",
   "trend": "bullish|bearish|sideways",
   "signal": "BUY|SELL|WAIT",
-  "nextCandle": "GREEN (CALL / UP) 🟢 | RED (PUT / DOWN) 🔴 | WAIT 🟡",
-  "whereToBuy": "Exact price level or zone where trader should click BUY / CALL (e.g. 0.51820 - 0.51835)",
-  "buyCondition": "Precise entry condition (e.g. Buy when candle tests 0.51820 support with lower wick rejection)",
-  "whereToSell": "Exact price level or zone where trader should click SELL / PUT (e.g. 0.51920 - 0.51935)",
-  "sellCondition": "Precise exit or short condition (e.g. Sell when candle rejects 0.51920 resistance)",
-  "quotexAction": "Clear instruction: e.g. Click GREEN (UP) on Quotex with 1-Minute expiration at next candle open",
-  "expiryTime": "1 Minute | 2 Minutes | 5 Minutes",
   "entry": "Recommended entry price level",
-  "stopLoss": "Protective stop loss / invalidation level",
+  "stopLoss": "Protective stop loss level",
   "takeProfit1": "Take profit 1 target",
   "takeProfit2": "Take profit 2 target",
-  "riskReward": "1:2.5",
-  "confidence": 88,
+  "riskReward": "Risk/Reward ratio",
+  "confidence": 85,
   "futureForecast": "Detailed future price trajectory prediction based directly on the detected timeframe and candle timing from the screenshot",
   "targetPrice": "Projected target price for the detected timeframe",
-  "timeHorizon": "Next 1-3 candles (based on detected timeframe)",
-  "patterns": ["Identified patterns (e.g. Double Bottom, Hammer Rejection, Order Block)"],
+  "timeHorizon": "e.g. Next 1-3 candles (based on detected 1m timeframe)",
+  "patterns": ["Identified patterns (e.g. Double Top, Engulfing, Support Bounce)"],
   "supportLevels": ["Support level 1", "Support level 2"],
   "resistanceLevels": ["Resistance level 1", "Resistance level 2"],
-  "summary": "Technical analysis summary explaining why this signal was generated",
+  "summary": "Technical analysis summary",
   "risks": ["Risk factors"]
 }
 Base price levels and timeframes strictly on what is readable in the image; use 'unclear' if not readable. If setup is weak, signal WAIT. Write text fields in language code "${lang}".`;
-
-// Heuristic fallback generator if Gemini Vision API key fails or network error occurs
-function generateSmartFallbackAnalysis(filename, lang) {
-  const fn = String(filename || '').toUpperCase();
-  let pair = 'CAD/CHF (OTC)';
-  if (fn.includes('EURUSD') || fn.includes('EUR')) pair = 'EUR/USD';
-  else if (fn.includes('GBPUSD') || fn.includes('GBP')) pair = 'GBP/USD';
-  else if (fn.includes('USDJPY') || fn.includes('JPY')) pair = 'USD/JPY';
-  else if (fn.includes('XAU') || fn.includes('GOLD')) pair = 'XAU/USD (Gold)';
-  else if (fn.includes('CAD')) pair = 'CAD/CHF (OTC)';
-
-  return {
-    pair: pair,
-    timeframe: "1m (Binary Options)",
-    detectedTime: "00:00:05 Expiration Clock",
-    trend: "bullish",
-    signal: "BUY",
-    nextCandle: "GREEN (CALL / UP) 🟢",
-    whereToBuy: "0.51820 - 0.51835 (Major Demand Zone)",
-    buyCondition: "Wait for current candle to test 0.51820 support. If lower wick rejects, enter CALL / UP immediately.",
-    whereToSell: "0.51920 - 0.51940 (Key Overhead Resistance)",
-    sellCondition: "Take profit near 0.51920 resistance, or enter PUT / DOWN if upper wick rejects.",
-    quotexAction: "👉 Click GREEN (UP) button on Quotex with 1-Minute expiration at next candle open.",
-    expiryTime: "1 Minute",
-    entry: "0.51828",
-    stopLoss: "0.51785",
-    takeProfit1: "0.51905",
-    takeProfit2: "0.51940",
-    riskReward: "1:2.8",
-    confidence: 88,
-    futureForecast: "Price is rejecting lower liquidity demand block with strong oversold RSI confluence. Momentum indicates a sharp bullish continuation green candle over the next 1-3 minutes.",
-    targetPrice: "0.51920",
-    timeHorizon: "Next 1-3 candles (1m)",
-    patterns: ["Bullish Pin Bar Rejection", "Liquidity Sweep", "Support Confluence"],
-    supportLevels: ["0.51820", "0.51790"],
-    resistanceLevels: ["0.51920", "0.51950"],
-    summary: "High-probability bounce from institutional demand block. Bullish momentum favors 1-minute CALL entries.",
-    risks: ["Avoid entry if current candle breaks cleanly below 0.51785."]
-  };
-}
 
 app.post('/api/analyze', auth, (req, res, next) => {
   upload.single('chart')(req, res, err => {
@@ -254,15 +207,7 @@ app.post('/api/analyze', auth, (req, res, next) => {
   else if (!mimeType || !mimeType.startsWith('image/')) mimeType = 'image/jpeg';
 
   if (used(req.user.id) >= LIMIT) return res.status(429).json({ error: `Daily limit of ${LIMIT} analyses reached. Resets at midnight UTC.` });
-
-  // If Gemini key is missing or blank, use smart algorithmic engine directly
-  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.trim() === '' || process.env.GEMINI_API_KEY.startsWith('AQ.')) {
-    console.log('Using Quant Technical Vision Engine for chart analysis.');
-    const fallback = generateSmartFallbackAnalysis(req.file.originalname, req.body.lang);
-    bump(req.user.id);
-    return res.json({ result: fallback, used: used(req.user.id), limit: LIMIT });
-  }
-
+  if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'Server missing GEMINI_API_KEY.' });
   try {
     const models = [process.env.GEMINI_MODEL || 'gemini-flash-lite-latest', 'gemini-flash-lite-latest', 'gemini-3.8-flash', 'gemini-flash-latest'];
     const uniqueModels = [...new Set(models)];
@@ -289,12 +234,7 @@ app.post('/api/analyze', auth, (req, res, next) => {
     const cleaned = text.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
     const result = JSON.parse(cleaned);
     bump(req.user.id); res.json({ result, used: used(req.user.id), limit: LIMIT });
-  } catch (e) {
-    console.warn('Gemini vision API error, switching to smart algorithmic technical analysis:', e.message);
-    const fallback = generateSmartFallbackAnalysis(req.file.originalname, req.body.lang);
-    bump(req.user.id);
-    res.json({ result: fallback, used: used(req.user.id), limit: LIMIT });
-  }
+  } catch (e) { res.status(500).json({ error: 'Analysis failed: ' + e.message }) }
 });
 
 // ---- Live Market Future Forecast
