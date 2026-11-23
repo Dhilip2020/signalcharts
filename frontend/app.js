@@ -189,7 +189,7 @@ const api = (u, o = {}) => fetch(u, {
     return j;
 });
 
-window.initGoogleAuth = function() {
+window.initGoogleAuth = function () {
     const gbtn = $('#gbtn');
     const customGBtn = $('#custom-google-btn');
     const noClientNotice = $('#no-client-notice');
@@ -251,7 +251,7 @@ async function init() {
 
     try {
         CFG = await (await fetch('/api/config')).json();
-    } catch {}
+    } catch { }
 
     window.initGoogleAuth();
     let retries = 0;
@@ -344,7 +344,7 @@ async function showApp() {
     }
     try {
         await usage();
-    } catch (e) {}
+    } catch (e) { }
     loadRates();
     setInterval(pollRates, 20000);
 }
@@ -354,7 +354,7 @@ async function usage() {
         const u = await api('/api/usage');
         const badge = $('#usage-badge');
         if (badge) badge.textContent = `${u.used} of ${u.limit} used`;
-    } catch {}
+    } catch { }
 }
 
 function setupNavigation() {
@@ -467,8 +467,8 @@ function renderAllMarketsGrid(filterCat = currentMarketFilter, query = currentMa
 
     const filtered = MASTER_MARKETS.filter(item => {
         const matchesCat = (filterCat === 'all' || item.group === filterCat);
-        const matchesQuery = !currentMarketSearch || 
-            item.symbol.toLowerCase().includes(currentMarketSearch) || 
+        const matchesQuery = !currentMarketSearch ||
+            item.symbol.toLowerCase().includes(currentMarketSearch) ||
             item.name.toLowerCase().includes(currentMarketSearch);
         return matchesCat && matchesQuery;
     });
@@ -809,6 +809,22 @@ function renderIntelligenceResult(r, tf) {
                 <div class="result-sig-pill ${esc(r.signal)}" style="font-size:14px;padding:4px 12px;">${esc(r.signal)}</div>
             </div>
 
+            <!-- EXACT TRADE SIGNALS -->
+            <div class="trade-execution-box">
+                <div class="signal-zones-grid">
+                    <div class="zone-card buy-zone">
+                        <div class="zone-badge">🟢 WHERE TO BUY (CALL / UP)</div>
+                        <div class="zone-price">${esc(r.keySupport || r.entry || 'Support Zone')}</div>
+                        <div class="zone-condition">Enter BUY when price tests this support level with upward momentum rejection.</div>
+                    </div>
+                    <div class="zone-card sell-zone">
+                        <div class="zone-badge">🔴 WHERE TO SELL (PUT / DOWN)</div>
+                        <div class="zone-price">${esc(r.keyResistance || r.targetPrice || 'Resistance Zone')}</div>
+                        <div class="zone-condition">Enter SELL when price touches overhead resistance or take profit on BUY.</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="forecast-card-highlight">
                 <h4>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -912,7 +928,7 @@ async function setFile(f) {
                     <p class="empty-sub">Click "Analyze chart" below to generate AI technical intelligence</p>
                 </div>`;
             return;
-        } catch (err) {}
+        } catch (err) { }
     }
 
     file = f;
@@ -976,14 +992,49 @@ if (goBtn) {
                 <div class="analysis-result-view">
                     <div class="result-hero-bar">
                         <div>
-                            <h3 style="font-size:18px;margin-bottom:4px;">${esc(r.pair || 'Forex Setup')}</h3>
+                            <h3 style="font-size:18px;margin-bottom:4px;">${esc(r.pair || 'Forex / Binary Setup')}</h3>
                             <div class="result-meta-title">
                                 Timeframe: <b style="color:var(--accent-blue);">${esc(r.timeframe || 'Chart')}</b>
-                                ${r.detectedTime ? '&nbsp;·&nbsp; Time: <b>' + esc(r.detectedTime) + '</b>' : ''}
+                                ${r.detectedTime ? '&nbsp;·&nbsp; Expiration Clock: <b>' + esc(r.detectedTime) + '</b>' : ''}
                                 &nbsp;·&nbsp; <span style="text-transform:capitalize;">${esc(r.trend)}</span>
                             </div>
                         </div>
                         <div class="result-sig-pill ${esc(r.signal)}">${esc(r.signal)}</div>
+                    </div>
+
+                    <!-- 🎯 EXACT WHERE TO BUY & WHERE TO SELL SIGNALS -->
+                    <div class="trade-execution-box">
+                        <div class="exec-header">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            <span>🎯 EXACT TRADE SIGNALS (BUY & SELL LEVELS)</span>
+                        </div>
+
+                        <!-- 2-COLUMN SIGNALS: BUY ZONE vs SELL ZONE -->
+                        <div class="signal-zones-grid">
+                            <div class="zone-card buy-zone">
+                                <div class="zone-badge">🟢 WHERE TO BUY (CALL / UP)</div>
+                                <div class="zone-price">${esc(r.whereToBuy || r.entry || 'Support Bounce Level')}</div>
+                                <div class="zone-condition">${esc(r.buyCondition || 'Enter BUY / CALL when price tests this support zone with bullish candle wick rejection.')}</div>
+                            </div>
+
+                            <div class="zone-card sell-zone">
+                                <div class="zone-badge">🔴 WHERE TO SELL (PUT / DOWN)</div>
+                                <div class="zone-price">${esc(r.whereToSell || r.takeProfit1 || r.keyResistance || 'Resistance Level')}</div>
+                                <div class="zone-condition">${esc(r.sellCondition || 'Enter SELL / PUT when price pushes into this resistance zone or take profit.')}</div>
+                            </div>
+                        </div>
+
+                        <!-- BROKER / QUOTEX ACTION BANNER -->
+                        <div class="broker-action-banner ${r.signal === 'SELL' ? 'action-put' : 'action-call'}">
+                            <div class="action-icon">${r.signal === 'SELL' ? '🔴' : '🟢'}</div>
+                            <div class="action-details">
+                                <div class="action-title">${esc(r.quotexAction || (r.signal === 'SELL' ? 'Click RED (DOWN) on Quotex with 1-Min Expiry' : 'Click GREEN (UP) on Quotex with 1-Min Expiry'))}</div>
+                                <div class="action-sub">
+                                    Next Candle: <b>${esc(r.nextCandle || (r.signal === 'SELL' ? 'RED (DOWN) 🔴' : 'GREEN (UP) 🟢'))}</b>
+                                    &nbsp;·&nbsp; Expiration: <b>${esc(r.expiryTime || r.timeframe || '1 Minute')}</b>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="forecast-card-highlight">
@@ -1044,7 +1095,7 @@ async function loadRates() {
         const p = await (await fetch('/api/pairs')).json();
         const apairSelect = $('#apair');
         if (apairSelect) apairSelect.innerHTML = p.map(x => `<option>${x}</option>`).join('');
-    } catch {}
+    } catch { }
     await pollRates();
 }
 
@@ -1063,7 +1114,7 @@ async function pollRates() {
         if (listV && listV.style.display !== 'none') {
             renderAllMarketsGrid(currentMarketFilter, currentMarketSearch);
         }
-    } catch (e) {}
+    } catch (e) { }
     checkAlerts();
 }
 
