@@ -142,40 +142,46 @@ app.get('/api/rates', async (req, res) => {
 });
 
 // ---- AI chart analysis (Gemini vision, free tier)
-const PROMPT = lang => `You are an expert forex and binary options technical analyst. Analyze the attached trading chart screenshot.
-CRITICAL TIMEFRAME & TIME DETECTION:
-1. Examine the image carefully to extract the EXACT PAIR and TIMEFRAME / CANDLE INTERVAL shown on the chart (for example: CAD/CHF, EUR/USD, USD/JPY, 5s, 15s, 30s, 1m, 2m, 5m, 10m, 15m, 30m, 1h, 4h, 1D). Check the header, pair badges, chart tools, interval buttons, candle icons, or time axis.
-2. If there is a visible clock, trade expiration timer, or countdown (e.g., 00:00:05, 16:25:39 UTC, etc.), extract it accurately.
-3. BASE YOUR FUTURE PRICE ACTION PREDICTION DIRECTLY ON THE DETECTED CHART TIMEFRAME AND LIVE CANDLE PATTERNS:
-   - Identify the real pair name shown in the image (e.g. CAD/CHF, USD/BDT, EUR/USD, etc.).
-   - If the chart is 1-minute (1m), forecast the next 1-3 candles (1 to 3 minutes).
-   - If the chart is 5-minute (5m), forecast the next 1-3 candles (5 to 15 minutes).
-   - If the chart is 1-hour (1h), forecast the next 1-4 hours.
-   - Align target price, entry, and stop loss precisely to the actual prices visible on the chart axis.
+const PROMPT = lang => `You are an elite forex and binary options technical analyst.
+Analyze the attached trading chart screenshot with maximum precision.
 
-Reply ONLY with JSON:
+CRITICAL PRICE & ASSET EXTRACTION:
+1. EXACT PAIR / ASSET: Look at the top-left pair label, tab, or title (e.g. CAD/CHF (OTC), USD/BDT (OTC), EUR/USD, GBP/USD, etc.). Read the exact pair name.
+2. PRICE SCALE ALIGNMENT (DO NOT GUESS OR HALLUCINATE PRICES):
+   - Look directly at the vertical price scale on the right-hand edge of the chart.
+   - Note the exact current market price highlighted on the scale or price line (e.g. 0.60017, 128.320, 1.08540).
+   - ALL price levels (entry, stopLoss, takeProfit1, takeProfit2, targetPrice, supportLevels, resistanceLevels) MUST strictly match the price scale visible in this specific screenshot.
+3. TIMEFRAME & EXPIRATION DETECTION:
+   - Identify the candle timeframe (e.g. 5s, 15s, 30s, 1m, 2m, 5m, 15m, 1h).
+   - If there is a visible expiration timer or countdown clock (e.g. 00:00:05), read it accurately.
+4. ACTIONABLE TRADE DIRECTION:
+   - Determine whether the next candle(s) favor BUY (CALL / GREEN / UP) or SELL (PUT / RED / DOWN).
+   - Provide realistic support/resistance levels based directly on visible recent swing highs and swing lows.
+
+Reply ONLY with valid JSON:
 {
-  "pair": "Exact currency pair identified from image (e.g. CAD/CHF, EUR/USD, USD/BDT, etc.)",
+  "pair": "Exact currency pair identified from image (e.g. CAD/CHF (OTC))",
   "timeframe": "Detected timeframe directly from chart (e.g. 1m, 5m, 15m, 1h)",
   "detectedTime": "Visible chart clock / timer if readable (e.g. 00:00:05 or 16:25 UTC)",
   "trend": "bullish|bearish|sideways",
   "signal": "BUY|SELL|WAIT",
-  "entry": "Recommended entry price level from the chart axis",
-  "stopLoss": "Protective stop loss level",
-  "takeProfit1": "Take profit 1 target",
-  "takeProfit2": "Take profit 2 target",
-  "riskReward": "Risk/Reward ratio",
-  "confidence": 85,
-  "futureForecast": "Detailed future price trajectory prediction based directly on the detected timeframe, visible price levels, and candle timing from the screenshot",
-  "targetPrice": "Projected target price for the detected timeframe",
+  "currentPrice": "Exact current price read from chart axis",
+  "entry": "Recommended entry price level matching chart axis",
+  "stopLoss": "Protective stop loss level matching chart axis",
+  "takeProfit1": "Take profit 1 target matching chart axis",
+  "takeProfit2": "Take profit 2 target matching chart axis",
+  "riskReward": "Risk/Reward ratio (e.g. 1:2.0)",
+  "confidence": 88,
+  "futureForecast": "Detailed future price trajectory prediction based directly on visible candles and timeframe",
+  "targetPrice": "Projected target price matching chart axis",
   "timeHorizon": "e.g. Next 1-3 candles (based on detected 1m timeframe)",
-  "patterns": ["Identified patterns (e.g. Double Top, Engulfing, Support Bounce)"],
+  "patterns": ["Identified patterns (e.g. Support Rejection, Bullish Pin Bar)"],
   "supportLevels": ["Support level 1", "Support level 2"],
   "resistanceLevels": ["Resistance level 1", "Resistance level 2"],
   "summary": "Technical analysis summary of this specific chart",
-  "risks": ["Risk factors"]
+  "risks": ["Key risk factors"]
 }
-Base price levels and timeframes strictly on what is readable in the image; use 'unclear' if not readable. If setup is weak, signal WAIT. Write text fields in language code "${lang}".`;
+Strictly ensure prices match the numbers visible on the chart axis. Write text fields in language code "${lang}".`;
 
 app.post('/api/analyze', auth, (req, res, next) => {
   upload.single('chart')(req, res, err => {
@@ -210,27 +216,32 @@ app.post('/api/analyze', auth, (req, res, next) => {
   if (used(req.user.id) >= LIMIT) return res.status(429).json({ error: `Daily limit of ${LIMIT} analyses reached. Resets at midnight UTC.` });
 
   const apiKey = (process.env.GEMINI_API_KEY || '').trim();
-  if (!apiKey || apiKey.startsWith('AQ.')) {
+  if (!apiKey) {
     return res.status(400).json({ 
-      error: 'Please configure a valid Google Gemini API Key in .env or Render. Get a free key (starts with AIzaSy...) at https://aistudio.google.com/apikey.' 
+      error: 'Missing GEMINI_API_KEY. Please set your GEMINI_API_KEY in .env or Render.' 
     });
   }
 
   // Clean and sanitize model name
-  let baseModel = String(process.env.GEMINI_MODEL || 'gemini-1.5-flash').trim().toLowerCase();
-  if (baseModel.includes('-latest')) baseModel = baseModel.replace('-latest', '');
-  if (baseModel.includes('3.8')) baseModel = 'gemini-1.5-flash';
-  if (!baseModel.startsWith('gemini-')) baseModel = 'gemini-1.5-flash';
+  let baseModel = String(process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim().toLowerCase();
+  if (baseModel.includes('1.5') || baseModel.includes('2.0') || baseModel.includes('2.5') || baseModel.includes('3.8')) {
+    baseModel = 'gemini-3.5-flash-lite';
+  }
 
-  const models = [baseModel, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+  const models = [baseModel, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash'];
   const uniqueModels = [...new Set(models)];
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-goog-api-key': apiKey
+  };
 
   let lastError = null;
   for (const model of uniqueModels) {
     try {
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({
           contents: [{
             parts: [
@@ -304,14 +315,23 @@ Reply ONLY with JSON:
 }
 Write all text fields in language code "${lang || 'en'}".`;
 
+  const apiKey = (process.env.GEMINI_API_KEY || '').trim();
+  if (!apiKey) return res.status(500).json({ error: 'Server missing GEMINI_API_KEY.' });
+
+  const headers = { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey };
+
   try {
-    const models = [process.env.GEMINI_MODEL || 'gemini-1.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+    let baseModel = String(process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim().toLowerCase();
+    if (baseModel.includes('1.5') || baseModel.includes('2.0') || baseModel.includes('2.5') || baseModel.includes('3.8')) {
+      baseModel = 'gemini-3.5-flash-lite';
+    }
+    const models = [baseModel, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash'];
     const uniqueModels = [...new Set(models)];
     let lastError = null, text = '';
     for (const model of uniqueModels) {
       try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST', headers: headers,
           body: JSON.stringify({ contents: [{ parts: [{ text: FORECAST_PROMPT }] }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json' } }),
           signal: AbortSignal.timeout(90000)
         });
@@ -369,14 +389,23 @@ Reply ONLY with JSON:
 }
 Write all text fields in language code "${lang || 'en'}".`;
 
+  const apiKey = (process.env.GEMINI_API_KEY || '').trim();
+  if (!apiKey) return res.status(500).json({ error: 'Server missing GEMINI_API_KEY.' });
+
+  const headers = { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey };
+
   try {
-    const models = [process.env.GEMINI_MODEL || 'gemini-1.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+    let baseModel = String(process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim().toLowerCase();
+    if (baseModel.includes('1.5') || baseModel.includes('2.0') || baseModel.includes('2.5') || baseModel.includes('3.8')) {
+      baseModel = 'gemini-3.5-flash-lite';
+    }
+    const models = [baseModel, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash'];
     const uniqueModels = [...new Set(models)];
     let lastError = null, text = '';
     for (const model of uniqueModels) {
       try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST', headers: headers,
           body: JSON.stringify({ contents: [{ parts: [{ text: DEEP_PROMPT }] }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json' } }),
           signal: AbortSignal.timeout(90000)
         });
@@ -406,4 +435,3 @@ server.on('error', (err) => {
   } else {
     console.error('Server error:', err);
   }
-});
