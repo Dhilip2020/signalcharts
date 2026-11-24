@@ -209,7 +209,7 @@ app.post('/api/analyze', auth, (req, res, next) => {
   if (used(req.user.id) >= LIMIT) return res.status(429).json({ error: `Daily limit of ${LIMIT} analyses reached. Resets at midnight UTC.` });
   if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'Server missing GEMINI_API_KEY.' });
   try {
-    const models = [process.env.GEMINI_MODEL || 'gemini-flash-lite-latest', 'gemini-flash-lite-latest', 'gemini-3.8-flash', 'gemini-flash-latest'];
+    const models = [process.env.GEMINI_MODEL || 'gemini-2.0-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-1.5-flash-latest'];
     const uniqueModels = [...new Set(models)];
     let lastError = null, text = '';
     for (const model of uniqueModels) {
@@ -279,7 +279,7 @@ Reply ONLY with JSON:
 Write all text fields in language code "${lang || 'en'}".`;
 
   try {
-    const models = [process.env.GEMINI_MODEL || 'gemini-flash-lite-latest', 'gemini-flash-lite-latest', 'gemini-3.8-flash', 'gemini-flash-latest'];
+    const models = [process.env.GEMINI_MODEL || 'gemini-2.0-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-1.5-flash-latest'];
     const uniqueModels = [...new Set(models)];
     let lastError = null, text = '';
     for (const model of uniqueModels) {
@@ -344,7 +344,7 @@ Reply ONLY with JSON:
 Write all text fields in language code "${lang || 'en'}".`;
 
   try {
-    const models = [process.env.GEMINI_MODEL || 'gemini-flash-lite-latest', 'gemini-flash-lite-latest', 'gemini-3.8-flash', 'gemini-flash-latest'];
+    const models = [process.env.GEMINI_MODEL || 'gemini-2.0-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-1.5-flash-latest'];
     const uniqueModels = [...new Set(models)];
     let lastError = null, text = '';
     for (const model of uniqueModels) {
